@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mondial Penalties</title>
+  <meta name="description" content="Séance de tirs au but : 48 nations, un seul trophée. Des seizièmes de finale jusqu'au titre mondial.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚽</text></svg>">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Semi+Condensed:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+<div id="stage">
+  <canvas id="game"></canvas>
+
+  <div id="hud">
+    <div id="scorebar">
+      <div class="side">
+        <span class="flag" id="hflagA"></span><span class="name" id="hnameA"></span>
+        <span class="dots" id="hdotsA"></span>
+      </div>
+      <div id="midscore"><span id="hscA">0</span><span>–</span><span id="hscB">0</span></div>
+      <div class="side right">
+        <span class="dots" id="hdotsB"></span>
+        <span class="name" id="hnameB"></span><span class="flag" id="hflagB"></span>
+      </div>
+    </div>
+    <div id="roundlabel"></div>
+    <div id="decisive">💓 Penalty décisif</div>
+  </div>
+
+  <div id="banner"></div>
+  <div id="prompt"></div>
+  <div id="trophytoast"><span class="medal"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M8 2 h3 l2 6 l-4 1 z" fill="currentColor" opacity=".55"/><path d="M16 2 h-3 l-2 6 l4 1 z" fill="currentColor" opacity=".75"/><circle cx="12" cy="15" r="6.4" fill="currentColor"/><path d="M12 11.4 l1.1 2.2 2.4 .35 -1.75 1.7 .4 2.4 -2.15 -1.15 -2.15 1.15 .4 -2.4 -1.75 -1.7 2.4 -.35 z" fill="#0e2033"/></svg></span><span class="tw"><span class="tk">Trophée débloqué</span><span class="tt"></span></span></div>
+  <button id="mutebtn" aria-label="Couper le son"></button>
+
+  <!-- Menu -->
+  <section class="screen" id="scr-menu">
+    <p class="kicker">Séance de tirs au but · 48 nations</p>
+    <h1 class="title">Mondial<br>Penalties</h1>
+    <p class="lede">Des seizièmes de finale jusqu'au titre mondial : chaque match se joue <b>aux tirs au but</b>.
+      Plus vous avancez, plus les gardiens sont affûtés et la flèche nerveuse.</p>
+    <div class="howto">
+      <div class="step">
+        <span class="ic"><svg width="30" height="26" viewBox="0 0 30 26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 22 Q10 4 24 8"/><path d="M24 8 l-6 -3 M24 8 l-2 6"/></svg></span>
+        <span class="tt">1 · Direction</span><span class="dd">La flèche balaie le but. Cliquez pour la figer.</span></div>
+      <div class="step">
+        <span class="ic"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="8" height="20" rx="3"/><path d="M9 16 h8" opacity=".7"/><path d="M9 9 h8" opacity=".4"/></svg></span>
+        <span class="tt">2 · Puissance</span><span class="dd">La jauge monte et descend. Cliquez au bon moment.</span></div>
+      <div class="step">
+        <span class="ic"><svg width="32" height="26" viewBox="0 0 32 26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 4 v18 M28 4 v18 M4 4 h24"/><path d="M10 18 L22 9"/><path d="M22 9 l-5.5 .5 M22 9 l-.5 5.5"/></svg></span>
+        <span class="tt">3 · Gardien</span><span class="dd">Glissez vers l'endroit où plonger, relâchez.</span></div>
+    </div>
+    <input id="pseudo" maxlength="16" placeholder="Votre nom de légende…" aria-label="Votre pseudo pour le classement">
+    <div class="rowbtns">
+      <button class="btn" id="btn-play">Entrer dans le stade</button>
+      <button class="btn ghost" id="btn-troph">Trophées</button>
+      <button class="btn ghost" id="btn-lb">Classement</button>
+    </div>
+    <p class="lede" style="font-size:13px">Clic / toucher ou barre <b>Espace</b> · flèches + Entrée pour plonger</p>
+  </section>
+
+  <!-- Trophées -->
+  <section class="screen hidden" id="scr-trophies">
+    <p class="kicker">Palmarès</p>
+    <h2 class="sub" id="troph-count"></h2>
+    <div id="trophgrid"></div>
+    <button class="btn ghost" id="btn-troph-back">Retour</button>
+  </section>
+
+  <!-- Country select -->
+  <section class="screen hidden" id="scr-select">
+    <p class="kicker">Choisissez votre nation</p>
+    <h2 class="sub">48 sélections, un seul trophée</h2>
+    <p class="lede" style="font-size:14px">Votre nation est qualifiée d'office pour les seizièmes&nbsp;; 31 autres sortent du tirage.</p>
+    <div id="teamsgrid"></div>
+  </section>
+
+  <!-- Bracket / next match -->
+  <section class="screen hidden" id="scr-bracket">
+    <p class="kicker" id="br-kicker">Tableau final</p>
+    <h2 class="sub" id="br-round"></h2>
+    <div id="mymatch">
+      <div class="big"><span class="f" id="mmA-f"></span><span class="n" id="mmA-n"></span></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+        <span class="vs">VS</span><span id="gkinfo"></span>
+      </div>
+      <div class="big"><span class="f" id="mmB-f"></span><span class="n" id="mmB-n"></span></div>
+    </div>
+    <button class="btn" id="btn-match">Jouer la séance</button>
+    <div id="fixtures"></div>
+  </section>
+
+  <!-- Eliminated -->
+  <section class="screen hidden" id="scr-out">
+    <p class="kicker">Fin du parcours</p>
+    <h2 class="sub" id="out-title"></h2>
+    <p class="lede" id="out-text"></p>
+    <p id="parcours"></p>
+    <div class="rowbtns">
+      <button class="btn" id="btn-retry">Retenter le mondial</button>
+      <button class="btn ghost" id="btn-country">Changer de nation</button>
+      <button class="btn ghost" id="btn-lb2">Classement</button>
+    </div>
+  </section>
+
+  <!-- Champion -->
+  <section class="screen hidden" id="scr-champ">
+    <div id="champ-trophy">
+      <svg viewBox="0 0 120 140" role="img" aria-label="Trophée">
+        <defs>
+          <linearGradient id="troG" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#fdf0c0"/><stop offset=".45" stop-color="#e9b83e"/><stop offset="1" stop-color="#9a7218"/>
+          </linearGradient>
+        </defs>
+        <g fill="url(#troG)" stroke="#7d5c14" stroke-width="2">
+          <path d="M30 14 h60 v26 c0 22 -13 36 -30 40 c-17 -4 -30 -18 -30 -40 z"/>
+          <path d="M30 20 c-14 0 -20 8 -18 18 c2 11 12 17 22 18 c-3 -5 -4 -10 -4 -16 z" fill-opacity=".92"/>
+          <path d="M90 20 c14 0 20 8 18 18 c-2 11 -12 17 -22 18 c3 -5 4 -10 4 -16 z" fill-opacity=".92"/>
+          <rect x="53" y="80" width="14" height="18" rx="3"/>
+          <path d="M40 100 h40 l6 14 h-52 z"/>
+          <rect x="30" y="114" width="60" height="12" rx="3"/>
+        </g>
+        <ellipse cx="47" cy="30" rx="7" ry="13" fill="#ffffff" opacity=".35" transform="rotate(-14 47 30)"/>
+      </svg>
+    </div>
+    <h1 class="title" style="font-size:clamp(36px,7vw,80px)" id="champ-title">Champions du monde</h1>
+    <p class="lede" id="champ-text"></p>
+    <p id="parcours2" style="font-size:14px;color:var(--ink-dim);text-align:center;max-width:70ch;line-height:1.6;margin:0"></p>
+    <div class="rowbtns">
+      <button class="btn" id="btn-again">Défendre le titre</button>
+      <button class="btn ghost" id="btn-country2">Changer de nation</button>
+      <button class="btn ghost" id="btn-lb3">Classement</button>
+    </div>
+  </section>
+
+  <!-- Cinématique de passage de tour -->
+  <section class="screen hidden" id="scr-cine">
+    <p class="kicker" id="cine-kicker"></p>
+    <h2 class="sub">Le tableau se resserre</h2>
+    <div id="cinegrid"></div>
+    <p id="cinecount"></p>
+    <p id="cinemsg"></p>
+    <button class="btn" id="btn-cine">Voir mon prochain match</button>
+  </section>
+
+  <!-- Classement des meilleurs performeurs -->
+  <section class="screen hidden" id="scr-lb">
+    <p class="kicker">Meilleurs performeurs</p>
+    <h2 class="sub">Classement</h2>
+    <p class="lede" style="font-size:13px">Sauvegardé sur cet appareil pour l'instant — le classement mondial arrivera avec la base de données.</p>
+    <div id="lbwrap"></div>
+    <button class="btn ghost" id="btn-lb-back">Retour</button>
+  </section>
+</div>
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
