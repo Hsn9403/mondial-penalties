@@ -307,7 +307,8 @@ function drawAimUI(){
     ctx.restore();
   }
   if(G.phase==='power'){
-    const x=1120,y0=400,y1=660,h=y1-y0;
+    // la jauge se recale sur le bord droit réellement visible (cadrage portrait)
+    const x=Math.min(1120,W/2+view.visW/2-120),y0=400,y1=660,h=y1-y0;
     ctx.save();
     ctx.fillStyle='rgba(9,22,37,.85)'; roundRect(x-6,y0-8,36,h+16,10);
     const g=ctx.createLinearGradient(0,y1,0,y0);

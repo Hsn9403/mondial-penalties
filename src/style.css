@@ -84,9 +84,11 @@
   /* ---------- Screens ---------- */
   .screen{
     position:absolute; inset:0; z-index:10; display:flex; flex-direction:column;
-    align-items:center; justify-content:center; gap:18px; padding:24px;
+    align-items:center; justify-content:safe center; gap:18px; padding:24px;
     background:radial-gradient(120% 90% at 50% 0%, rgba(13,32,54,.88), rgba(5,11,20,.94));
     backdrop-filter:blur(3px);
+    /* sur petit écran le contenu dépasse : il doit rester atteignable */
+    overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain;
   }
   .screen.hidden{display:none;}
   .kicker{
@@ -295,3 +297,87 @@
   #mutebtn:hover{border-color:var(--gold); color:var(--gold);}
   #mutebtn svg{display:block;}
   .rowbtns{display:flex; gap:14px; flex-wrap:wrap; justify-content:center;}
+
+  /* ---------- Invitation à passer en paysage ---------- */
+  #rotate{
+    position:absolute; left:50%; transform:translateX(-50%); bottom:14px; z-index:8;
+    display:none; align-items:center; gap:9px;
+    background:rgba(9,22,37,.9); border:1px solid rgba(233,184,62,.45); border-radius:22px;
+    padding:7px 16px; font-size:13px; font-weight:600; letter-spacing:.04em; color:var(--ink);
+    pointer-events:none; box-shadow:0 6px 20px rgba(0,0,0,.5);
+  }
+  #rotate svg{color:var(--gold); animation:tilt 2.2s ease-in-out infinite;}
+  @keyframes tilt{0%,60%,100%{transform:rotate(0)}75%{transform:rotate(-88deg)}}
+  @media (prefers-reduced-motion: reduce){#rotate svg{animation:none;}}
+  body.portrait #rotate{display:flex;}
+
+  /* ---------- Écrans courts : tout doit tenir sans être coupé ---------- */
+  @media (max-height:760px){
+    .screen{gap:11px; padding:16px 14px;}
+    h1.title{font-size:clamp(34px,8vw,58px);}
+    h2.sub{font-size:clamp(17px,3.2vw,24px);}
+    .lede{font-size:14px; line-height:1.4;}
+    .kicker{font-size:11px; letter-spacing:.24em;}
+    .btn{padding:11px 30px; font-size:18px;}
+    .btn.ghost{padding:8px 18px; font-size:14px;}
+    #teamsgrid{max-height:48vh;}
+    #trophgrid{max-height:46vh;}
+    #lbwrap{max-height:46vh;}
+    #fixtures{max-height:30vh;}
+  }
+  /* les 3 cartes d'explication passent en liste compacte, puis disparaissent */
+  @media (max-height:760px){
+    .howto{gap:8px; margin-top:0;}
+    .howto .step{
+      flex-direction:row; width:auto; gap:8px; padding:7px 11px; align-items:center;
+    }
+    .howto .step .ic{height:auto;}
+    .howto .step .ic svg{width:19px; height:17px;}
+    .howto .step .dd{display:none;}
+    .howto .step .tt{font-size:12px;}
+  }
+  @media (max-height:600px){
+    .howto{display:none;}
+    #mymatch{padding:11px 18px; gap:14px;}
+    #mymatch .big .f{font-size:34px;}
+    #mymatch .big .n{font-size:15px;}
+  }
+  @media (max-width:520px){
+    /* empilées verticalement, les 3 cartes mangent tout l'écran : version compacte */
+    .howto{gap:7px; margin-top:0; flex-direction:column; width:100%; max-width:330px;}
+    .howto .step{flex-direction:row; width:auto; gap:9px; padding:8px 12px; align-items:center;}
+    .howto .step .ic{height:auto;}
+    .howto .step .ic svg{width:20px; height:18px;}
+    .howto .step .dd{display:none;}
+    .howto .step .tt{font-size:13px;}
+    h1.title{font-size:clamp(38px,11vw,64px);}
+    .lede{font-size:14px;}
+  }
+  @media (max-width:430px){
+    #teamsgrid{grid-template-columns:repeat(auto-fill,minmax(96px,1fr)); gap:7px;}
+    .teamcard{padding:9px 4px 8px;}
+    .teamcard .f{font-size:26px;}
+    .teamcard .n{font-size:12px;}
+    .teamcard .s{font-size:10px; letter-spacing:.08em;}
+    #fixtures{grid-template-columns:1fr;}
+    #cinegrid{grid-template-columns:1fr;}
+    #scorebar{padding:6px 10px; gap:8px;}
+    .side .flag{font-size:20px;}
+    .dot{width:10px; height:10px;}
+    #lbtable{font-size:13px;}
+    #lbtable td,#lbtable th{padding:6px 5px;}
+    #prompt{white-space:normal; text-align:center; max-width:92vw; font-size:13px; padding:7px 16px;}
+    #mutebtn{width:36px; height:36px;}
+  }
+
+  /* ---------- Corrections de chevauchement sur petit écran ---------- */
+  @media (max-width:430px){
+    /* les noms de nation ne tiennent pas à côté des pastilles : drapeaux + score suffisent */
+    .side .name{display:none;}
+    #scorebar{gap:6px;}
+    .dots{gap:4px;}
+    /* le bouton son sortait sous le bandeau de score : il descend dans la bande basse */
+    #mutebtn{top:auto; bottom:12px; right:12px;}
+  }
+  /* en portrait, la consigne de tir se cale au-dessus de l'invitation à tourner */
+  body.portrait #prompt{bottom:60px;}
