@@ -33,6 +33,12 @@ $('#btn-lb2').addEventListener('click',()=>openBoard('#scr-out'));
 $('#btn-lb3').addEventListener('click',()=>openBoard('#scr-champ'));
 $('#btn-lb-back').addEventListener('click',()=>showScreen(G.lbBack||'#scr-menu'));
 $('#btn-cine').addEventListener('click',()=>{ clearTimers(); showBracket(); });
+// le conseil d'orientation est masquable : sur un téléphone dont la rotation
+// est verrouillée, il serait sinon impossible à faire disparaître
+const rotateEl=$('#rotate');
+if(lsGet('mp-rotate-off',false)) rotateEl.classList.add('gone');
+rotateEl.addEventListener('click',()=>{ rotateEl.classList.add('gone'); lsSet('mp-rotate-off',true); });
+
 const pseudoEl=$('#pseudo');
 pseudoEl.value=String(lsGet('mp-player','')||'');
 pseudoEl.addEventListener('input',()=>lsSet('mp-player',pseudoEl.value));

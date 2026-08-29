@@ -53,7 +53,7 @@ function nextKick(){
     G.phase='pick'; G.striker={t:0,team:G.oppTeam}; G.pickT=0;
     G.dive={target:{x:640,y:352},dragging:false,sx:0,sy:0,moved:0};
     planOppShot();
-    setPrompt(`${dec}${kickLabel(G.kicksB)} adverse — plongez <em>au moment de la frappe</em>&nbsp;: glissez, relâchez&nbsp;!`);
+    setPrompt(`${dec}${kickLabel(G.kicksB)} adverse — plongez <em>au moment de la frappe</em>&nbsp;: touchez l'endroit&nbsp;!`);
   }
   updateHud();
 }
@@ -301,29 +301,28 @@ cv.addEventListener('pointerdown',e=>{
   Snd.ensure();
   if(G.screen!=='match') return;
   if(diveInputActive()){
-    const p=toLogical(e);
-    G.dive.dragging=true; G.dive.sx=p.x; G.dive.sy=p.y; G.dive.moved=0;
-    G.dive.base={x:G.dive.target.x,y:G.dive.target.y};
+    // visée absolue : on plonge là où le doigt se pose. Un glissement relatif
+    // était impraticable au toucher, et un simple tap renvoyait au centre —
+    // soit l'inverse de ce qu'on vise en touchant un coin.
+    G.dive.dragging=true;
+    G.dive.target=diveAt(e);
     cv.setPointerCapture&&cv.setPointerCapture(e.pointerId);
     return;
   }
   primaryAction();
 });
+function diveAt(e){
+  const p=toLogical(e);
+  return {x:clamp(p.x,450,830),y:clamp(p.y,268,416)};
+}
 cv.addEventListener('pointermove',e=>{
   if(!G.dive.dragging) return;
-  const p=toLogical(e);
-  const dx=p.x-G.dive.sx, dy=p.y-G.dive.sy;
-  G.dive.moved=Math.max(G.dive.moved,Math.hypot(dx,dy));
-  G.dive.target={
-    x:clamp(G.dive.base.x+dx*1.6,450,830),
-    y:clamp(G.dive.base.y+dy*1.6,268,416),
-  };
+  G.dive.target=diveAt(e);
 });
 addEventListener('pointerup',e=>{
   if(!G.dive.dragging) return;
   G.dive.dragging=false;
-  if(G.dive.moved<10) G.dive.target={x:640,y:352}; // simple tap : il reste au centre
-  commitDive();
+  commitDive();   // relâcher valide le plongeon, tap simple compris
 });
 addEventListener('keydown',e=>{
   if(e.repeat) return;

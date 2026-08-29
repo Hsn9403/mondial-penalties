@@ -304,8 +304,12 @@
     display:none; align-items:center; gap:9px;
     background:rgba(9,22,37,.9); border:1px solid rgba(233,184,62,.45); border-radius:22px;
     padding:7px 16px; font-size:13px; font-weight:600; letter-spacing:.04em; color:var(--ink);
-    pointer-events:none; box-shadow:0 6px 20px rgba(0,0,0,.5);
+    box-shadow:0 6px 20px rgba(0,0,0,.5);
+    font-family:inherit; cursor:pointer; text-align:left; line-height:1.25;
   }
+  #rotate span{display:flex; flex-direction:column;}
+  #rotate b{font-weight:500; font-size:11px; color:var(--ink-dim); letter-spacing:.02em;}
+  #rotate.gone{display:none !important;}
   #rotate svg{color:var(--gold); animation:tilt 2.2s ease-in-out infinite;}
   @keyframes tilt{0%,60%,100%{transform:rotate(0)}75%{transform:rotate(-88deg)}}
   @media (prefers-reduced-motion: reduce){#rotate svg{animation:none;}}
