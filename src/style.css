@@ -403,6 +403,19 @@
   /* en portrait, la consigne de tir se cale au-dessus de l'invitation à tourner */
   body.portrait #prompt{bottom:60px;}
 
+  /* rappel permanent de la touche Échap — inutile sans clavier, donc masqué au tactile */
+  #bosshint{
+    position:absolute; left:12px; bottom:12px; z-index:20; pointer-events:none;
+    display:none; align-items:center; gap:7px;
+    font-size:12px; font-weight:600; letter-spacing:.04em; color:var(--ink-dim);
+    background:rgba(9,22,37,.75); border:1px solid rgba(159,176,192,.25); border-radius:16px; padding:4px 11px 4px 5px;
+  }
+  #bosshint kbd{
+    font:700 11px/1 inherit; font-family:inherit; color:var(--ink); letter-spacing:.06em;
+    background:var(--panel2); border:1px solid rgba(159,176,192,.45); border-bottom-width:2px; border-radius:4px; padding:3px 6px;
+  }
+  @media (hover:hover) and (pointer:fine){ #bosshint{display:flex;} }
+
   /* ---------- Mode discret (Échap) : un tableur des plus ennuyeux ---------- */
   #boss{
     position:fixed; inset:0; z-index:1000; display:flex; flex-direction:column;
