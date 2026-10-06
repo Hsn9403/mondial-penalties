@@ -33,9 +33,19 @@ const G={
 };
 
 /* --------------------------- difficulty ---------------------------- */
-function diff(){ const r=G.roundIdx; return {
-  arrowF:.55+r*.13,
-  powerF:.62+r*.14,
+/* niveau 0 → 4,5 : le tour pèse, mais surtout la force FIFA de l'adversaire.
+   Un gros (Espagne, 95) dès les seizièmes vaut une demi-finale contre un petit. */
+function oppLevel(){
+  const s=G.oppTeam?G.oppTeam.s:80;
+  return Math.min(4.5,Math.max(0,G.roundIdx*.55+(s-74)/21*2.6));
+}
+function gkStars(){ const n=Math.min(5,Math.round(oppLevel())+1); return '★'.repeat(n)+'☆'.repeat(5-n); }
+/* votre propre nation compte aussi : un cador tire plus juste et plonge plus loin */
+function myEdge(){ return G.myTeam?(G.myTeam.s-84)/11:0; }   // ≈ -1,2 → +1
+function diff(){ const r=oppLevel(), m=myEdge(); return {
+  arrowF:(.55+r*.13)*(1-.07*m),
+  powerF:(.62+r*.14)*(1-.07*m),
+  myReach:1+.07*m,          // portée de plongeon de votre gardien
   gkGuess:.42+r*.09,        // proba de lire le bon côté
   gkErr:120-r*16,           // erreur d'estimation du gardien (px)
   gkReach:58+r*7,           // rayon d'arrêt de base
@@ -43,4 +53,4 @@ function diff(){ const r=G.roundIdx; return {
   oppSpread:46-r*7,
 };}
 
-export { W, H, GOAL, SPOT, GK_BASE, GK_HANDS0, G, diff };
+export { W, H, GOAL, SPOT, GK_BASE, GK_HANDS0, G, diff, gkStars };

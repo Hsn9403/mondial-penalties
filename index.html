@@ -58,7 +58,7 @@
       <button class="btn ghost" id="btn-troph">Trophées</button>
       <button class="btn ghost" id="btn-lb">Classement</button>
     </div>
-    <p class="lede" style="font-size:13px">Clic / toucher ou barre <b>Espace</b> · flèches + Entrée pour plonger</p>
+    <p class="lede" style="font-size:13px">Clic / toucher ou barre <b>Espace</b> · flèches + Entrée pour plonger · <b>Échap</b>&nbsp;: écran discret</p>
   </section>
 
   <!-- Trophées -->
@@ -82,14 +82,14 @@
     <p class="kicker" id="br-kicker">Tableau final</p>
     <h2 class="sub" id="br-round"></h2>
     <div id="mymatch">
-      <div class="big"><span class="f" id="mmA-f"></span><span class="n" id="mmA-n"></span></div>
+      <div class="big"><span class="f" id="mmA-f"></span><span class="n" id="mmA-n"></span><span class="r" id="mmA-r"></span></div>
       <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
         <span class="vs">VS</span><span id="gkinfo"></span>
       </div>
-      <div class="big"><span class="f" id="mmB-f"></span><span class="n" id="mmB-n"></span></div>
+      <div class="big"><span class="f" id="mmB-f"></span><span class="n" id="mmB-n"></span><span class="r" id="mmB-r"></span></div>
     </div>
     <button class="btn" id="btn-match">Jouer la séance</button>
-    <div id="fixtures"></div>
+    <div class="bkwrap" id="bk-next"></div>
   </section>
 
   <!-- Eliminated -->
@@ -98,6 +98,8 @@
     <h2 class="sub" id="out-title"></h2>
     <p class="lede" id="out-text"></p>
     <p id="parcours"></p>
+    <p id="out-champ"></p>
+    <div class="bkwrap" id="bk-out"></div>
     <div class="rowbtns">
       <button class="btn" id="btn-retry">Retenter le mondial</button>
       <button class="btn ghost" id="btn-country">Changer de nation</button>
@@ -128,6 +130,7 @@
     <h1 class="title" style="font-size:clamp(36px,7vw,80px)" id="champ-title">Champions du monde</h1>
     <p class="lede" id="champ-text"></p>
     <p id="parcours2" style="font-size:14px;color:var(--ink-dim);text-align:center;max-width:70ch;line-height:1.6;margin:0"></p>
+    <div class="bkwrap" id="bk-champ"></div>
     <div class="rowbtns">
       <button class="btn" id="btn-again">Défendre le titre</button>
       <button class="btn ghost" id="btn-country2">Changer de nation</button>
@@ -139,7 +142,7 @@
   <section class="screen hidden" id="scr-cine">
     <p class="kicker" id="cine-kicker"></p>
     <h2 class="sub">Le tableau se resserre</h2>
-    <div id="cinegrid"></div>
+    <div class="bkwrap" id="bk-cine"></div>
     <p id="cinecount"></p>
     <p id="cinemsg"></p>
     <button class="btn" id="btn-cine">Voir mon prochain match</button>
@@ -153,6 +156,16 @@
     <div id="lbwrap"></div>
     <button class="btn ghost" id="btn-lb-back">Retour</button>
   </section>
+
+  <!-- Mode discret (Échap) -->
+  <div id="boss" hidden>
+    <div class="bx-bar"><span class="bx-logo"></span><span class="bx-file">Suivi budgétaire T4</span>
+      <span class="bx-menu">Fichier&nbsp;&nbsp; Édition&nbsp;&nbsp; Affichage&nbsp;&nbsp; Insertion&nbsp;&nbsp; Format&nbsp;&nbsp; Données&nbsp;&nbsp; Outils</span></div>
+    <div class="bx-tools"><span>↶</span><span>↷</span><span class="sep"></span><span>100 %</span><span class="sep"></span><span>€</span><span>%</span><span>.0</span><span class="sep"></span><span><b>G</b></span><span><i>I</i></span><span><u>S</u></span></div>
+    <div class="bx-fx"><span class="bx-ref">H19</span><span class="bx-eq">fx</span><span>=SOMME(H2:H18)</span></div>
+    <div class="bx-sheet"><table id="boss-grid"></table></div>
+    <div class="bx-tabs"><span class="on">Budget T4</span><span>Hypothèses</span><span>Archives T3</span></div>
+  </div>
 </div>
 <script type="module" src="/src/main.js"></script>
 </body>

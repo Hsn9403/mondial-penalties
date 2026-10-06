@@ -354,7 +354,7 @@ function drawVignette(){
 let lastT=performance.now();
 function loop(now){
   const dt=Math.min(.05,(now-lastT)/1000); lastT=now;
-  update(dt); render();
+  if(!G.paused){ update(dt); render(); }
   requestAnimationFrame(loop);
 }
 function startLoop(){ lastT=performance.now(); requestAnimationFrame(loop); }

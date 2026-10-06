@@ -1,5 +1,5 @@
 import { $ } from './utils.js';
-import { G } from './state.js';
+import { G, gkStars } from './state.js';
 import { ROUNDS } from './data.js';
 
 /* ============================== HUD ================================= */
@@ -32,7 +32,7 @@ function updateHud(){
   renderDots($('#hdotsA'),G.kicksA, myTurn&&G.phase!=='idle');
   renderDots($('#hdotsB'),G.kicksB, !myTurn&&G.phase!=='idle');
   const sd=G.kicksA.length>=5&&G.kicksB.length>=5;
-  $('#roundlabel').innerHTML=`${ROUNDS[G.roundIdx]}${sd?' · <b>Mort subite</b>':''} · Gardien <b>${'★'.repeat(G.roundIdx+1)}${'☆'.repeat(5-G.roundIdx-1)}</b>`;
+  $('#roundlabel').innerHTML=`${ROUNDS[G.roundIdx]}${sd?' · <b>Mort subite</b>':''} · Gardien <b>${gkStars()}</b>`;
 }
 
 export { showScreen, setPrompt, banner, scoreOf, renderDots, updateHud };

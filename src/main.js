@@ -9,6 +9,7 @@ import { startMatch, clearTimers } from './match.js';
 import { showScreen } from './ui.js';
 import { buildCrowd } from './effects.js';
 import { startLoop } from './render.js';
+import './boss.js';
 
 /* ============================== MENUS =============================== */
 function buildTeamGrid(){

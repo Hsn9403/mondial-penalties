@@ -4,15 +4,20 @@ import { G, diff, SPOT, GOAL, GK_HANDS0, GK_BASE } from './state.js';
 import { cv, toLogical } from './canvas.js';
 import { buildCrowd, confetti, sparkBurst, updateParts } from './effects.js';
 import { showScreen, setPrompt, banner, scoreOf, updateHud } from './ui.js';
-import { advanceTournament, showBracket, parcoursHtml } from './tournament.js';
+import { advanceTournament, finishTournament, parcoursHtml } from './tournament.js';
+import { renderBracket } from './bracket.js';
 import { unlock, champNations } from './trophies.js';
 import { recordRun } from './leaderboard.js';
 import { TEAMS, ROUNDS, PASS_MSGS, LOSS_MSGS, CHAMP_MSGS } from './data.js';
 
 /* ============================= MATCH ================================ */
+/* minuteries suspendables : le mode discret gèle aussi l'enchaînement des tirs */
 let timers=[];
-function later(fn,ms){ timers.push(setTimeout(fn,ms)); }
-function clearTimers(){ timers.forEach(clearTimeout); timers=[]; }
+function arm(t,ms){ t.due=performance.now()+ms; t.id=setTimeout(()=>{ timers=timers.filter(x=>x!==t); t.fn(); },ms); }
+function later(fn,ms){ const t={fn}; timers.push(t); if(G.paused) t.left=ms; else arm(t,ms); }
+function clearTimers(){ timers.forEach(t=>clearTimeout(t.id)); timers=[]; }
+function pauseTimers(){ const now=performance.now(); for(const t of timers){ clearTimeout(t.id); t.left=Math.max(0,t.due-now); } }
+function resumeTimers(){ for(const t of timers) arm(t,t.left); }
 
 function startMatch(){
   clearTimers();
@@ -61,7 +66,7 @@ function nextKick(){
 /* ------------------- portée de plongeon (joueur) ------------------- */
 function playerEff(target,pw){
   const stretch=Math.hypot(target.x-GK_HANDS0.x,target.y-GK_HANDS0.y);
-  return 104*(1.12-.45*pw)*(1-.18*Math.min(1,stretch/300));
+  return 104*diff().myReach*(1.12-.45*pw)*(1-.18*Math.min(1,stretch/300));
 }
 
 /* --------------------------- player shot --------------------------- */
@@ -243,6 +248,7 @@ function endMatch(result){
         $('#champ-title').textContent=`${G.myTeam.n}, champion du monde`;
         $('#champ-text').innerHTML=`${G.myTeam.f} ${pick(CHAMP_MSGS)(G.myTeam.n)} Cinq séances de tirs au but remportées d'affilée.`;
         $('#parcours2').innerHTML='Parcours — '+parcoursHtml();
+        renderBracket($('#bk-champ'));
         showScreen('#scr-champ');
         confetti(220,[G.myTeam.c1,G.myTeam.c2,'#e9b83e','#f4f4f4']);
       } else showCinematic(prevBracket,wonIdx);
@@ -253,39 +259,39 @@ function endMatch(result){
       $('#hud').style.display='none';
       G.history.push({round:ROUNDS[G.roundIdx],opp:G.oppTeam,sc:[a,b]});
       recordRun(false);
+      finishTournament(a,b);
       $('#out-title').textContent=`${G.myTeam.n} s'arrête en ${ROUNDS[G.roundIdx].toLowerCase()}`;
       $('#out-text').innerHTML=`${pick(LOSS_MSGS[G.roundIdx])(G.myTeam.n)} Battus <b>${b} – ${a}</b> par ${G.oppTeam.f} ${G.oppTeam.n}.`;
       $('#parcours').innerHTML=G.history.length>1?('Parcours — '+parcoursHtml()):'';
+      $('#out-champ').innerHTML=`Le Mondial s'est poursuivi sans vous&nbsp;: <b>${G.champion.f} ${G.champion.n}</b> soulève le trophée.`;
+      renderBracket($('#bk-out'));
       showScreen('#scr-out');
     },2300);
   }
 }
 
 /* ================= CINÉMATIQUE DE PASSAGE DE TOUR =================== */
-/* le tour gagné se rejoue carte par carte, puis les éliminés s'effacent */
+/* match par match, le perdant s'éteint et le vainqueur avance d'une case */
 function showCinematic(prevBracket,wonIdx){
   $('#cine-kicker').textContent=`${ROUNDS[wonIdx]} · Résultats`;
   $('#cinecount').innerHTML=`<b>${prevBracket.length*2}</b> équipes &nbsp;→&nbsp; <b>${prevBracket.length}</b> qualifiées`;
   const msgEl=$('#cinemsg'); msgEl.classList.remove('show'); msgEl.textContent='';
   const btn=$('#btn-cine'); btn.classList.remove('show');
-  const g=$('#cinegrid'); g.classList.remove('shrink'); g.innerHTML='';
-  for(const m of prevBracket){
-    const mine=m.a===G.myTeam||m.b===G.myTeam;
-    const wA=m.res[0]>m.res[1];
-    const d=document.createElement('div'); d.className='fx'+(mine?' mine':'');
-    d.innerHTML=`<span class="t${wA?'':' ko'}"><span>${m.a.f}</span><span class="nm ${wA?'win':''}">${m.a.n}</span></span>
-      <span class="sc">${m.res[0]} – ${m.res[1]}</span>
-      <span class="t${wA?' ko':''}"><span class="nm ${wA?'':'win'}" style="text-align:right">${m.b.n}</span><span>${m.b.f}</span></span>`;
-    g.appendChild(d);
-  }
+  const bk=renderBracket($('#bk-cine'),{anim:wonIdx});
   showScreen('#scr-cine');
-  const cards=[...g.children];
-  const step=Math.min(260,2600/cards.length);   // rythme adapté au nombre de matchs
-  cards.forEach((c,i)=>later(()=>{ c.classList.add('reveal'); Snd.kick(); },300+step*i));
-  const tDone=300+step*cards.length+700;
-  later(()=>{ g.classList.add('shrink'); Snd.groan(); },tDone);            // le tableau se réduit
-  later(()=>{ msgEl.textContent=pick(PASS_MSGS[wonIdx])(G.myTeam.n); msgEl.classList.add('show'); Snd.roar(); },tDone+800);
-  later(()=>btn.classList.add('show'),tDone+1500);
+  const n=prevBracket.length;
+  const step=Math.min(240,2600/n);   // rythme adapté au nombre de matchs
+  for(let i=0;i<n;i++) later(()=>{
+    for(const el of bk.querySelectorAll(`.s[data-k="${wonIdx}"].ko-later`)){
+      if((+el.dataset.i>>1)===i) el.classList.replace('ko-later','ko');
+    }
+    const w=bk.querySelector(`.s[data-k="${wonIdx+1}"][data-i="${i}"]`);
+    if(w) w.classList.remove('pend');
+    Snd.kick();
+  },300+step*i);
+  const tDone=300+step*n+500;
+  later(()=>{ msgEl.textContent=pick(PASS_MSGS[wonIdx])(G.myTeam.n); msgEl.classList.add('show'); Snd.roar(); },tDone);
+  later(()=>btn.classList.add('show'),tDone+700);
 }
 
 
@@ -325,7 +331,7 @@ addEventListener('pointerup',e=>{
   commitDive();   // relâcher valide le plongeon, tap simple compris
 });
 addEventListener('keydown',e=>{
-  if(e.repeat) return;
+  if(e.repeat||G.paused) return;
   if(e.code==='Space'||e.code==='Enter'){
     if(G.screen==='match'){ e.preventDefault(); primaryAction(); }
     return;
@@ -404,4 +410,4 @@ function update(dt){
   }
 }
 
-export { startMatch, clearTimers, update, diveInputActive, playerEff, oppPlan };
+export { startMatch, clearTimers, pauseTimers, resumeTimers, update, diveInputActive, playerEff, oppPlan };

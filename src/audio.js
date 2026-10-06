@@ -35,6 +35,8 @@ const Snd=(()=>{
   }
   return {
     ensure,
+    // mode discret : on gèle tout le son d'un coup, sans toucher au réglage muet
+    hush(on){ if(!ac) return; if(on) ac.suspend(); else if(started) ac.resume(); },
     toggle(){ muted=!muted; ensure(); if(master) master.gain.value=muted?0:1; return muted; },
     swell(){ if(crowdGain&&ac) env(crowdGain,ac.currentTime,.34,1.4); },
     roar(){ if(!ac)return; env(crowdGain,ac.currentTime,.95,3.2); noiseBurst(900,.7,.5,1.6); },

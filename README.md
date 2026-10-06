@@ -23,6 +23,12 @@ npm run preview    # sert le build de prod en local
 - **Penalty décisif** : battement de cœur, halo rouge et badge quand le tir peut
   gagner ou perdre le match.
 - Clavier : `Espace`/`Entrée` pour tirer, flèches + `Entrée` pour plonger.
+- **Mode discret** : `Échap` fige la partie, coupe le son et affiche un tableur de suivi budgétaire
+  (titre d'onglet et icône compris). `Échap` à nouveau pour reprendre.
+- **Forces réelles** : les nations sont classées selon le classement FIFA (juillet 2026). La force
+  pèse sur le tirage (têtes de série), les matchs simulés et la difficulté de vos adversaires.
+- **Tableau final** : le tableau s'affiche en arbre, des seizièmes jusqu'à la coupe au centre ;
+  après une élimination, le reste du Mondial est simulé jusqu'au sacre.
 
 ## Architecture (`src/`)
 
