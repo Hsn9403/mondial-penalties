@@ -4,3 +4,5 @@ dist/
 *.local
 dist-single/
 .env
+.vercel
+.env*
