@@ -15,7 +15,7 @@ let user=null, profile=null;
 
 function currentUser(){ return user; }
 function profileName(){ return profile?profile.display_name:null; }
-function canPlay(){ return !sb||!!user; }
+function canPlay(){ return !sb||!!user||guestLocal; }
 
 const ERRORS=[
   [/failed to fetch|network/i,'Serveur injoignable : vérifiez votre connexion.'],
@@ -134,30 +134,24 @@ async function armGoogleButton(){
   });
 }
 /* Les navigateurs intégrés aux applis (LinkedIn, Instagram…) sont refusés par
-   Google (« disallowed_useragent ») : on invite à rouvrir le jeu dans le vrai navigateur. */
-const IN_APP=[
-  [/LinkedInApp/i,'LinkedIn'], [/Instagram/i,'Instagram'], [/FBAN|FBAV|FB_IAB/i,'Facebook'],
-  [/Twitter/i,'X'], [/TikTok|musical_ly|BytedanceWebview/i,'TikTok'], [/Snapchat/i,'Snapchat'],
-  [/\bLine\//i,'Line'], [/GSA\//i,'Google'], [/; wv\)/i,null],
-];
-function inAppBrowser(){
-  const ua=navigator.userAgent||'';
-  for(const [re,name] of IN_APP) if(re.test(ua)) return {name};
-  return null;
-}
-function setupInApp(app){
+   Google (« disallowed_useragent ») : on y joue directement, avec un compte
+   invité Supabase (connexion anonyme) qui compte quand même joueurs et parties. */
+const IN_APP=/LinkedInApp|Instagram|FBAN|FBAV|FB_IAB|Twitter|TikTok|musical_ly|BytedanceWebview|Snapchat|\bLine\/|GSA\/|; wv\)/i;
+let guestLocal=false;
+function setupInApp(){
   document.body.classList.add('in-app');
   $('#inapp').hidden=false;
-  if(app.name) $('#inapp-name').textContent=app.name;
-  const url=location.href.split('#')[0];
-  if(/Android/i.test(navigator.userAgent)){
-    // Android : un lien « intent » ouvre directement Chrome
-    const a=$('#inapp-open'); a.hidden=false;
-    a.href='intent://'+url.replace(/^https?:\/\//,'')+'#Intent;scheme=https;package=com.android.chrome;end';
-  }
-  $('#inapp-copy').addEventListener('click',async()=>{
-    try{ await navigator.clipboard.writeText(url); say('Lien copié : collez-le dans Safari ou Chrome.'); }
-    catch{ say(url); }
+  $('#btn-guest').addEventListener('click',async()=>{
+    const name=$('#guest-name').value.trim().slice(0,24)||'Invité';
+    say('Ouverture du stade…');
+    const {error}=await sb.auth.signInAnonymously({options:{data:{full_name:name}}});
+    if(!error) return;                         // la suite se fait dans onAuthStateChange
+    // connexion invité refusée par le serveur : on joue quand même, hors compte
+    console.warn('[compte] invité refusé, partie hors ligne :',error.message);
+    guestLocal=true; say('');
+    document.body.classList.remove('auth-wait','auth-out','auth-in');
+    for(const el of document.querySelectorAll('.needs-db')) el.hidden=true;
+    $('#pseudo').value=name;
   });
 }
 /* Sur téléphone, la fenêtre surgissante de Google est capricieuse (onglet qui
@@ -166,8 +160,7 @@ const IS_MOBILE=matchMedia('(pointer:coarse)').matches||/Android|iPhone|iPad|iPo
 
 async function setupGoogle(){
   $('#btn-google').addEventListener('click',signInGoogleRedirect);
-  const app=inAppBrowser();
-  if(app){ setupInApp(app); return; }
+  if(IN_APP.test(navigator.userAgent||'')){ setupInApp(); return; }
   if(!GOOGLE_CLIENT_ID||IS_MOBILE) return;    // redirection seule
   try{
     await loadGsi();
@@ -203,6 +196,7 @@ function initAccount(){
   sb.auth.onAuthStateChange((_ev,session)=>{
     // pas d'appel Supabase attendu dans ce callback (risque de blocage) : on diffère
     setTimeout(async()=>{
+      if(guestLocal) return;
       user=session?session.user:null;
       await loadProfile();
       say('');

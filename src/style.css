@@ -299,14 +299,14 @@
   #lbtable tbody tr:nth-child(3) td.rank{color:#c07a3f;}
   #lbtable tr.me td{background:rgba(233,184,62,.08);}
   #lbempty{color:var(--ink-dim); text-align:center;}
-  #pseudo{
+  #pseudo, #guest-name{
     background:var(--panel); border:1px solid rgba(159,176,192,.35); border-radius:8px;
     color:var(--ink); font-family:inherit; font-size:16px; font-weight:600; letter-spacing:.04em;
     padding:9px 14px; width:min(300px,80vw); text-align:center; outline:none;
     -webkit-user-select:text; user-select:text;
   }
-  #pseudo:focus{border-color:var(--gold);}
-  #pseudo::placeholder{color:var(--ink-dim); opacity:.7;}
+  #pseudo:focus, #guest-name:focus{border-color:var(--gold);}
+  #pseudo::placeholder, #guest-name::placeholder{color:var(--ink-dim); opacity:.7;}
 
   /* ---------- Logo de retour à l'accueil ---------- */
   #homelogo{
@@ -444,11 +444,8 @@
   body.gsi-ready #gsi-btn{display:flex;}
   body.gsi-ready #btn-google{display:none;}
   /* navigateur intégré (LinkedIn, Instagram…) : Google y refuse la connexion */
-  #inapp{width:100%; box-sizing:border-box; background:var(--panel); border:1px solid var(--gold); border-radius:10px; padding:14px 16px; text-align:center;}
-  #inapp p{margin:0 0 12px; font-size:15px; line-height:1.45; color:var(--ink);}
-  #inapp b{color:var(--gold);}
-  .inapp-btns{display:flex; flex-wrap:wrap; gap:10px; justify-content:center;}
-  .inapp-btns .btn{font-size:15px; padding:10px 16px; text-decoration:none;}
+  #inapp{width:100%; display:flex; flex-direction:column; align-items:center; gap:12px;}
+  #inapp:not([hidden]){display:flex;}
   body.in-app #gsi-btn, body.in-app #btn-google{display:none !important;}
   .gate-note{margin:0; font-size:13px; color:var(--ink-dim); text-align:center; line-height:1.4;}
   .gate-note a{color:var(--ink-dim); text-underline-offset:3px;}
