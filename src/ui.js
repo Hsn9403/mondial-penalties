@@ -6,6 +6,8 @@ import { ROUNDS } from './data.js';
 function showScreen(id){
   for(const s of document.querySelectorAll('.screen')) s.classList.add('hidden');
   if(id) $(id).classList.remove('hidden');
+  // logo de retour à l'accueil : partout hors de l'accueil, jamais en plein match
+  document.body.classList.toggle('has-home',!!id&&id!=='#scr-menu');
 }
 function setPrompt(html){ const p=$('#prompt'); if(!html){p.style.display='none';return;} p.innerHTML=html; p.style.display='block'; }
 function banner(text,cls=''){

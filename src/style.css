@@ -308,6 +308,20 @@
   #pseudo:focus{border-color:var(--gold);}
   #pseudo::placeholder{color:var(--ink-dim); opacity:.7;}
 
+  /* ---------- Logo de retour à l'accueil ---------- */
+  #homelogo{
+    position:absolute; top:12px; left:12px; z-index:20; display:none; align-items:center; gap:8px;
+    background:rgba(9,22,37,.85); border:1px solid rgba(233,184,62,.35); border-radius:22px;
+    padding:5px 14px 5px 6px; cursor:pointer; color:var(--gold);
+    font-family:Anton,sans-serif; font-size:13px; line-height:1; letter-spacing:.06em; text-transform:uppercase; text-align:left;
+  }
+  #homelogo svg{display:block; flex-shrink:0;}
+  #homelogo:hover{border-color:var(--gold); background:rgba(19,42,66,.95);}
+  #homelogo:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+  body.has-home #homelogo{display:flex;}
+  /* le contenu des écrans ne doit pas passer sous le logo */
+  body.has-home .screen{padding-top:68px;}
+
   #mutebtn{
     position:absolute; top:12px; right:12px; z-index:20;
     width:42px; height:42px; border-radius:50%; border:1px solid rgba(159,176,192,.35);

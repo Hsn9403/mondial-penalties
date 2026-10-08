@@ -34,6 +34,7 @@ $('#btn-lb').addEventListener('click',()=>openBoard('#scr-menu'));
 $('#btn-lb2').addEventListener('click',()=>openBoard('#scr-out'));
 $('#btn-lb3').addEventListener('click',()=>openBoard('#scr-champ'));
 $('#btn-lb-back').addEventListener('click',()=>showScreen(G.lbBack||'#scr-menu'));
+$('#homelogo').addEventListener('click',()=>{ clearTimers(); $('#hud').style.display='none'; showScreen('#scr-menu'); });
 $('#btn-cine').addEventListener('click',()=>{ clearTimers(); showBracket(); });
 // le conseil d'orientation est masquable : sur un téléphone dont la rotation
 // est verrouillée, il serait sinon impossible à faire disparaître
