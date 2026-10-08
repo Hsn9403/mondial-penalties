@@ -53,3 +53,22 @@ npm run preview    # sert le build de prod en local
       dans `leaderboard.js` (`Leaderboard.list()` / `Leaderboard.submit()`) : seules
       ces deux fonctions sont à remplacer par l'API distante.
 - [ ] Mise en production (build statique : Vercel / Netlify / GitHub Pages).
+
+## Comptes joueurs & classement mondial (Supabase)
+
+Sans configuration, le jeu tourne en mode local (classement sur l'appareil, pas de comptes).
+Pour activer les comptes (Google ou e-mail) et le classement mondial :
+
+1. Créer un projet gratuit sur [supabase.com](https://supabase.com).
+2. **SQL Editor** → coller et exécuter `supabase/migrations/20261008000000_comptes_et_parties.sql`.
+3. Copier `.env.example` en `.env.local` et y mettre l'URL et la clé *publishable* du projet
+   (Project Settings → API). Sur Vercel : mêmes variables dans Settings → Environment Variables.
+4. **Authentication → URL Configuration** : *Site URL* = l'URL du jeu en prod, et ajouter
+   `http://localhost:5173` aux *Redirect URLs*.
+5. Google : créer un identifiant OAuth « Application Web » dans Google Cloud Console
+   (APIs & Services → Credentials), avec comme *Authorized redirect URI*
+   `https://<projet>.supabase.co/auth/v1/callback` ; puis coller Client ID / Secret dans
+   Supabase → Authentication → Providers → Google.
+
+Suivi des joueurs et des parties : `supabase/stats.sql` (à lancer dans le SQL Editor).
+Une partie = un Mondial terminé (élimination ou titre) par un joueur connecté.

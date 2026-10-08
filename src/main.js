@@ -10,6 +10,7 @@ import { showScreen } from './ui.js';
 import { buildCrowd } from './effects.js';
 import { startLoop } from './render.js';
 import './boss.js';
+import { initAccount, setDisplayName } from './account.js';
 
 /* ============================== MENUS =============================== */
 function buildTeamGrid(){
@@ -42,7 +43,8 @@ rotateEl.addEventListener('click',()=>{ rotateEl.classList.add('gone'); lsSet('m
 
 const pseudoEl=$('#pseudo');
 pseudoEl.value=String(lsGet('mp-player','')||'');
-pseudoEl.addEventListener('input',()=>lsSet('mp-player',pseudoEl.value));
+pseudoEl.addEventListener('input',()=>{ lsSet('mp-player',pseudoEl.value); setDisplayName(pseudoEl.value); });
+initAccount();
 $('#btn-match').addEventListener('click',()=>startMatch());
 $('#btn-retry').addEventListener('click',()=>{ newTournament(TEAMS.indexOf(G.myTeam)); });
 $('#btn-again').addEventListener('click',()=>{ newTournament(TEAMS.indexOf(G.myTeam)); });
