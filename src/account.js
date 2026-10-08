@@ -4,26 +4,29 @@ import { G } from './state.js';
 import { showScreen } from './ui.js';
 
 /* ============================== COMPTE ============================== */
+/* Connexion Google obligatoire pour jouer (dès que Supabase est configuré).
+   L'état est porté par une classe sur <body> :
+     auth-wait → session en cours de vérification
+     auth-out  → déconnecté : seul le bouton Google est proposé
+     auth-in   → connecté : le jeu est accessible
+   Sans Supabase (mode local), aucune classe : tout reste ouvert. */
 let user=null, profile=null;
 
 function currentUser(){ return user; }
 function profileName(){ return profile?profile.display_name:null; }
+function canPlay(){ return !sb||!!user; }
 
 const ERRORS=[
-  [/invalid login credentials/i,'E-mail ou mot de passe incorrect.'],
-  [/already registered|already been registered/i,'Un compte existe déjà avec cet e-mail : connectez-vous.'],
-  [/email not confirmed/i,'Confirmez d\'abord votre e-mail (lien reçu par mail).'],
-  [/password should be at least/i,'Mot de passe trop court (6 caractères minimum).'],
-  [/rate limit|too many/i,'Trop de tentatives, réessayez dans une minute.'],
   [/failed to fetch|network/i,'Serveur injoignable : vérifiez votre connexion.'],
   [/provider is not enabled/i,'La connexion Google n\'est pas encore activée sur le serveur.'],
+  [/rate limit|too many/i,'Trop de tentatives, réessayez dans une minute.'],
 ];
 function frError(e){
   const m=String(e&&e.message||e);
   for(const [re,fr] of ERRORS) if(re.test(m)) return fr;
   return 'Oups : '+m;
 }
-function say(text,kind=''){ const el=$('#acc-msg'); el.textContent=text; el.className=kind; }
+function say(text,kind=''){ const el=$('#auth-msg'); el.textContent=text; el.className=kind; }
 
 async function loadProfile(){
   if(!user){ profile=null; return; }
@@ -37,28 +40,26 @@ async function loadStats(){
   $('#acc-best').textContent=data.length?Math.max(...data.map(g=>g.points)):'–';
   $('#acc-titles').textContent=data.filter(g=>g.champion).length;
 }
+function escHtml(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
+function setAuthState(st){
+  document.body.classList.remove('auth-wait','auth-out','auth-in');
+  document.body.classList.add('auth-'+st);
+}
 function refreshUi(){
   const on=!!user;
-  $('#acc-out').hidden=on; $('#acc-in').hidden=!on;
-  $('#acc-title').textContent=on?'Votre vestiaire':'Entrez dans la légende';
   if(on){
     $('#acc-name').textContent=profileName()||'…';
-    $('#acc-mail').textContent=user.email?` · ${user.email}`:'';
-    loadStats();
+    $('#acc-mail').textContent=user.email||'';
+    $('#accchip').innerHTML=`Connecté · <b>${escHtml(profileName()||'')}</b> · <u>mon compte</u>`;
+    // le pseudo du menu est celui du compte
+    if(profileName()) $('#pseudo').value=profileName();
   }
-  const chip=$('#accchip');
-  chip.innerHTML=on?`Connecté · <b>${escHtml(profileName()||'')}</b>`:'Mode invité · <u>créer un compte</u> pour sauvegarder vos parties';
-  for(const b of document.querySelectorAll('.acc-cta')) b.hidden=on;
-  // le pseudo du menu devient celui du compte
-  if(on&&profileName()) $('#pseudo').value=profileName();
 }
-function escHtml(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
 function openAccount(back){
   G.accBack=back||'#scr-menu';
-  say('');
-  refreshUi();
+  refreshUi(); loadStats();
   showScreen('#scr-account');
 }
 
@@ -75,11 +76,17 @@ function setDisplayName(name){
   },700);
 }
 
-/* une partie terminée → une ligne en base (si connecté) */
+/* une partie terminée → une ligne en base */
 async function saveGame(g){
   if(!user) return;
   const {error}=await sb.from('games').insert(g);
   if(error) console.warn('[compte] partie non enregistrée :',error.message);
+}
+
+async function signInGoogle(){
+  say('Redirection vers Google…');
+  const {error}=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname}});
+  if(error) say(frError(error),'err');
 }
 
 function initAccount(){
@@ -88,49 +95,25 @@ function initAccount(){
     for(const el of document.querySelectorAll('.needs-db')) el.hidden=true;
     return;
   }
+  setAuthState('wait');
+  $('#btn-google').addEventListener('click',signInGoogle);
   $('#btn-account').addEventListener('click',()=>openAccount('#scr-menu'));
   $('#accchip').addEventListener('click',()=>openAccount('#scr-menu'));
   $('#btn-acc-back').addEventListener('click',()=>showScreen(G.accBack||'#scr-menu'));
-  for(const b of document.querySelectorAll('.acc-cta')){
-    b.addEventListener('click',()=>openAccount('#'+b.closest('.screen').id));
-  }
-  $('#btn-google').addEventListener('click',async()=>{
-    say('Redirection vers Google…');
-    const {error}=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname}});
-    if(error) say(frError(error),'err');
-  });
-  $('#acc-form').addEventListener('submit',async e=>{
-    e.preventDefault();
-    const mode=e.submitter&&e.submitter.dataset.mode||'in';
-    const form=e.currentTarget, btns=form.querySelectorAll('button');
-    const email=$('#acc-email').value.trim(), password=$('#acc-pw').value;
-    for(const b of btns) b.disabled=true;
-    say(mode==='up'?'Création du compte…':'Connexion…');
-    try{
-      if(mode==='up'){
-        const {data,error}=await sb.auth.signUp({email,password,options:{emailRedirectTo:location.origin+location.pathname}});
-        if(error) throw error;
-        if(!data.session) say('Compte créé ! Cliquez sur le lien reçu par e-mail pour l\'activer.','ok');
-        else say('Bienvenue dans la légende !','ok');
-      }else{
-        const {error}=await sb.auth.signInWithPassword({email,password});
-        if(error) throw error;
-        say('Connecté. Bon match !','ok');
-      }
-    }catch(err){ say(frError(err),'err'); }
-    finally{ for(const b of btns) b.disabled=false; }
-  });
-  $('#btn-logout').addEventListener('click',async()=>{ await sb.auth.signOut(); say('Déconnecté.'); });
+  $('#btn-logout').addEventListener('click',async()=>{ await sb.auth.signOut(); showScreen('#scr-menu'); });
 
   sb.auth.onAuthStateChange((_ev,session)=>{
     // pas d'appel Supabase attendu dans ce callback (risque de blocage) : on diffère
     setTimeout(async()=>{
       user=session?session.user:null;
       await loadProfile();
+      say('');
+      setAuthState(user?'in':'out');
       refreshUi();
+      // déconnecté (session expirée, autre onglet…) : retour au menu, seule porte d'entrée
+      if(!user){ $('#hud').style.display='none'; showScreen('#scr-menu'); }
     },0);
   });
-  refreshUi();
 }
 
-export { initAccount, currentUser, profileName, setDisplayName, saveGame, openAccount };
+export { initAccount, currentUser, profileName, canPlay, setDisplayName, saveGame, openAccount };

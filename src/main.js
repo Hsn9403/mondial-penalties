@@ -10,7 +10,7 @@ import { showScreen } from './ui.js';
 import { buildCrowd } from './effects.js';
 import { startLoop } from './render.js';
 import './boss.js';
-import { initAccount, setDisplayName } from './account.js';
+import { initAccount, setDisplayName, canPlay } from './account.js';
 
 /* ============================== MENUS =============================== */
 function buildTeamGrid(){
@@ -27,7 +27,7 @@ buildTeamGrid();
 const SVG_ON='<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M3 8 h3 l4 -4 v12 l-4 -4 h-3 z" fill="currentColor"/><path d="M13 7 q2 3 0 6 M15.5 5 q3.4 5 0 10"/></svg>';
 const SVG_OFF='<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M3 8 h3 l4 -4 v12 l-4 -4 h-3 z" fill="currentColor"/><path d="M13 7 l5 6 M18 7 l-5 6"/></svg>';
 $('#mutebtn').innerHTML=SVG_ON;
-$('#btn-play').addEventListener('click',()=>{ Snd.ensure(); Snd.swell(); buildTeamGrid(); showScreen('#scr-select'); });
+$('#btn-play').addEventListener('click',()=>{ if(!canPlay()) return; Snd.ensure(); Snd.swell(); buildTeamGrid(); showScreen('#scr-select'); });
 $('#btn-troph').addEventListener('click',()=>{ renderTrophies(); showScreen('#scr-trophies'); });
 $('#btn-troph-back').addEventListener('click',()=>showScreen('#scr-menu'));
 $('#btn-lb').addEventListener('click',()=>openBoard('#scr-menu'));

@@ -53,13 +53,19 @@
         <span class="ic"><svg width="32" height="26" viewBox="0 0 32 26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 4 v18 M28 4 v18 M4 4 h24"/><path d="M10 18 L22 9"/><path d="M22 9 l-5.5 .5 M22 9 l-.5 5.5"/></svg></span>
         <span class="tt">3 · Gardien</span><span class="dd">Touchez l'endroit où plonger, au moment de la frappe.</span></div>
     </div>
-    <input id="pseudo" maxlength="24" placeholder="Votre nom de légende…" aria-label="Votre pseudo pour le classement">
-    <button type="button" id="accchip" class="needs-db"></button>
+    <input id="pseudo" class="auth-only" maxlength="24" placeholder="Votre nom de légende…" aria-label="Votre pseudo pour le classement">
+    <button type="button" id="accchip" class="needs-db auth-only"></button>
+    <div class="gate needs-db guest-only">
+      <button type="button" class="gbtn" id="btn-google"><svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.6 13.3l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.4 5.7c4.3-4 6.9-9.9 6.9-17.1z"/><path fill="#FBBC05" d="M10.5 28.6c-.5-1.4-.8-3-.8-4.6s.3-3.2.8-4.6l-7.9-6.1C1 16.6 0 20.2 0 24s1 7.4 2.6 10.7l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.4-5.7c-2.1 1.4-4.8 2.3-8.5 2.3-6.3 0-11.6-4.1-13.5-9.9l-7.9 6.1C6.6 42.6 14.6 48 24 48z"/></svg><span>Se connecter avec Google pour jouer</span></button>
+      <p class="gate-note">Gratuit · vos parties et vos titres sont sauvegardés et comptent au classement mondial.</p>
+      <p id="auth-msg" role="status"></p>
+    </div>
+    <p class="gate-wait needs-db">Vérification de la connexion…</p>
     <div class="rowbtns">
-      <button class="btn" id="btn-play">Entrer dans le stade</button>
+      <button class="btn auth-only" id="btn-play">Entrer dans le stade</button>
       <button class="btn ghost" id="btn-troph">Trophées</button>
       <button class="btn ghost" id="btn-lb">Classement</button>
-      <button class="btn ghost needs-db" id="btn-account">Compte</button>
+      <button class="btn ghost needs-db auth-only" id="btn-account">Compte</button>
     </div>
     <p class="lede" style="font-size:13px">Clic / toucher ou barre <b>Espace</b> · flèches + Entrée pour plonger · <b>Échap</b>&nbsp;: quitter discrètement (écran de travail)</p>
   </section>
@@ -108,7 +114,6 @@
       <button class="btn ghost" id="btn-country">Changer de nation</button>
       <button class="btn ghost" id="btn-lb2">Classement</button>
     </div>
-    <button class="linkbtn acc-cta needs-db" hidden>Sauvegardez vos parties&nbsp;: créez un compte →</button>
   </section>
 
   <!-- Champion -->
@@ -140,7 +145,6 @@
       <button class="btn ghost" id="btn-country2">Changer de nation</button>
       <button class="btn ghost" id="btn-lb3">Classement</button>
     </div>
-    <button class="linkbtn acc-cta needs-db" hidden>Inscrivez ce titre au classement mondial&nbsp;: créez un compte →</button>
   </section>
 
   <!-- Cinématique de passage de tour -->
@@ -165,21 +169,8 @@
   <!-- Compte joueur -->
   <section class="screen hidden" id="scr-account">
     <p class="kicker">Compte joueur</p>
-    <h2 class="sub" id="acc-title">Entrez dans la légende</h2>
-    <div id="acc-out" class="accbox">
-      <p class="lede" style="font-size:15px">Sauvegardez vos parties et apparaissez au classement mondial.</p>
-      <button type="button" class="gbtn" id="btn-google"><svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.6 13.3l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.4 5.7c4.3-4 6.9-9.9 6.9-17.1z"/><path fill="#FBBC05" d="M10.5 28.6c-.5-1.4-.8-3-.8-4.6s.3-3.2.8-4.6l-7.9-6.1C1 16.6 0 20.2 0 24s1 7.4 2.6 10.7l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.4-5.7c-2.1 1.4-4.8 2.3-8.5 2.3-6.3 0-11.6-4.1-13.5-9.9l-7.9 6.1C6.6 42.6 14.6 48 24 48z"/></svg><span>Continuer avec Google</span></button>
-      <div class="or"><span>ou par e-mail</span></div>
-      <form id="acc-form">
-        <input type="email" id="acc-email" autocomplete="email" placeholder="E-mail" aria-label="E-mail" required>
-        <input type="password" id="acc-pw" autocomplete="current-password" placeholder="Mot de passe (6 caractères min.)" aria-label="Mot de passe" minlength="6" required>
-        <div class="rowbtns">
-          <button class="btn" type="submit" data-mode="in">Se connecter</button>
-          <button class="btn ghost" type="submit" data-mode="up">Créer un compte</button>
-        </div>
-      </form>
-    </div>
-    <div id="acc-in" class="accbox" hidden>
+    <h2 class="sub">Votre vestiaire</h2>
+    <div id="acc-in" class="accbox">
       <p class="who"><b id="acc-name"></b><span id="acc-mail"></span></p>
       <div class="accstats">
         <div><b id="acc-games">–</b><span>Parties</span></div>
@@ -189,7 +180,6 @@
       <p class="lede" style="font-size:13px">Votre pseudo se modifie depuis le menu principal.</p>
       <button class="btn ghost" id="btn-logout">Se déconnecter</button>
     </div>
-    <p id="acc-msg" role="status"></p>
     <button class="btn ghost" id="btn-acc-back">Retour</button>
   </section>
 

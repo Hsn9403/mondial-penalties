@@ -57,7 +57,8 @@ npm run preview    # sert le build de prod en local
 ## Comptes joueurs & classement mondial (Supabase)
 
 Sans configuration, le jeu tourne en mode local (classement sur l'appareil, pas de comptes).
-Pour activer les comptes (Google ou e-mail) et le classement mondial :
+Une fois Supabase configuré, **la connexion Google est obligatoire pour jouer** (pas d'inscription par e-mail).
+Pour l'activer :
 
 1. Créer un projet gratuit sur [supabase.com](https://supabase.com).
 2. **SQL Editor** → coller et exécuter `supabase/migrations/20261008000000_comptes_et_parties.sql`.
@@ -71,4 +72,5 @@ Pour activer les comptes (Google ou e-mail) et le classement mondial :
    Supabase → Authentication → Providers → Google.
 
 Suivi des joueurs et des parties : `supabase/stats.sql` (à lancer dans le SQL Editor).
-Une partie = un Mondial terminé (élimination ou titre) par un joueur connecté.
+Une partie = un Mondial terminé (élimination ou titre).
+Pour n'autoriser que Google côté serveur aussi : Supabase → Authentication → Sign In / Providers → désactiver *Email*.
