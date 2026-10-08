@@ -6,7 +6,7 @@ import { buildCrowd, confetti, sparkBurst, updateParts } from './effects.js';
 import { showScreen, setPrompt, banner, scoreOf, updateHud } from './ui.js';
 import { advanceTournament, finishTournament, parcoursHtml } from './tournament.js';
 import { renderBracket } from './bracket.js';
-import { unlock, champNations } from './trophies.js';
+import { unlock, champNations, addTitle } from './trophies.js';
 import { recordRun } from './leaderboard.js';
 import { TEAMS, ROUNDS, PASS_MSGS, LOSS_MSGS, CHAMP_MSGS } from './data.js';
 
@@ -238,11 +238,10 @@ function endMatch(result){
       const champion=advanceTournament(a,b);
       if(champion){
         unlock('champion');
-        const titles=lsGet('mp-titles',0)+1; lsSet('mp-titles',titles);
+        const titles=addTitle(G.myTeam.n);
         if(titles>=2) unlock('double');
         if(G.myTeam.s<=80) unlock('outsider');
         if(G.gcOk) unlock('grand-chelem');
-        champNations.add(G.myTeam.n); lsSet('mp-champs',[...champNations]);
         if(champNations.size>=TEAMS.length) unlock('integral');
         recordRun(true);
         $('#champ-title').textContent=`${G.myTeam.n}, champion du monde`;

@@ -2,6 +2,7 @@ import { $ } from './utils.js';
 import { sb } from './db.js';
 import { G } from './state.js';
 import { showScreen } from './ui.js';
+import { useProgress } from './trophies.js';
 
 /* ============================== COMPTE ============================== */
 /* Connexion Google obligatoire pour jouer (dès que Supabase est configuré).
@@ -29,9 +30,19 @@ function frError(e){
 function say(text,kind=''){ const el=$('#auth-msg'); el.textContent=text; el.className=kind; }
 
 async function loadProfile(){
-  if(!user){ profile=null; return; }
-  const {data}=await sb.from('profiles').select('display_name').eq('id',user.id).maybeSingle();
+  if(!user){ profile=null; useProgress(null); return; }
+  const {data,error}=await sb.from('profiles').select('display_name,progress').eq('id',user.id).maybeSingle();
+  if(error){
+    // colonne progress pas encore créée en base : on retombe sur le pseudo seul
+    const r=await sb.from('profiles').select('display_name').eq('id',user.id).maybeSingle();
+    profile=r.data; useProgress(null); return;
+  }
   profile=data;
+  const uid=user.id;
+  useProgress(data&&data.progress,p=>{
+    sb.from('profiles').update({progress:p}).eq('id',uid)
+      .then(({error})=>{ if(error) console.warn('[compte] trophées non sauvegardés :',error.message); });
+  });
 }
 async function loadStats(){
   const {data,error}=await sb.from('games').select('points,champion');

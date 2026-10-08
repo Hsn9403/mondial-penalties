@@ -2,12 +2,30 @@ import { lsGet, lsSet } from './utils.js';
 import { TROPHIES, TEAMS } from './data.js';
 
 /* ============================ TROPHIES ============================== */
-let unlockedTrophies=new Set(lsGet('mp-trophies',[]));
-let champNations=new Set(lsGet('mp-champs',[]));   // nations avec lesquelles on a été champion
+/* La progression (trophées, nations sacrées, nombre de titres) appartient au
+   joueur : avec un compte, elle vit dans son profil en base et le suit d'un
+   appareil à l'autre. Sans base configurée (mode local), elle reste sur l'appareil. */
+const unlockedTrophies=new Set(lsGet('mp-trophies',[]));
+const champNations=new Set(lsGet('mp-champs',[]));   // nations avec lesquelles on a été champion
+let titles=lsGet('mp-titles',0);
+let saver=p=>{ lsSet('mp-trophies',p.trophies); lsSet('mp-champs',p.champs); lsSet('mp-titles',p.titles); };
+
+function progress(){ return {trophies:[...unlockedTrophies],champs:[...champNations],titles}; }
+function saveProgress(){ saver(progress()); }
+/* bascule sur la progression d'un compte (ou la remet à zéro à la déconnexion) */
+function useProgress(p,save){
+  unlockedTrophies.clear(); champNations.clear();
+  for(const id of (p&&p.trophies)||[]) unlockedTrophies.add(id);
+  for(const n of (p&&p.champs)||[]) champNations.add(n);
+  titles=(p&&p.titles)||0;
+  saver=save||(()=>{});
+}
+function addTitle(nation){ titles++; champNations.add(nation); saveProgress(); return titles; }
+
 let toastQ=[], toastBusy=false;
 function unlock(id){
   if(unlockedTrophies.has(id)) return;
-  unlockedTrophies.add(id); lsSet('mp-trophies',[...unlockedTrophies]);
+  unlockedTrophies.add(id); saveProgress();
   const t=TROPHIES.find(x=>x.id===id);
   if(t){ toastQ.push(t); if(!toastBusy) nextToast(); }
 }
@@ -36,4 +54,4 @@ function renderTrophies(){
   document.querySelector('#troph-count').textContent=`${unlockedTrophies.size} / ${TROPHIES.length} débloqués`;
 }
 
-export { unlockedTrophies, champNations, unlock, renderTrophies };
+export { unlockedTrophies, champNations, unlock, renderTrophies, useProgress, addTitle };
