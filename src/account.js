@@ -133,9 +133,42 @@ async function armGoogleButton(){
     width:Math.min(400,Math.round(host.getBoundingClientRect().width)||320),
   });
 }
+/* Les navigateurs intégrés aux applis (LinkedIn, Instagram…) sont refusés par
+   Google (« disallowed_useragent ») : on invite à rouvrir le jeu dans le vrai navigateur. */
+const IN_APP=[
+  [/LinkedInApp/i,'LinkedIn'], [/Instagram/i,'Instagram'], [/FBAN|FBAV|FB_IAB/i,'Facebook'],
+  [/Twitter/i,'X'], [/TikTok|musical_ly|BytedanceWebview/i,'TikTok'], [/Snapchat/i,'Snapchat'],
+  [/\bLine\//i,'Line'], [/GSA\//i,'Google'], [/; wv\)/i,null],
+];
+function inAppBrowser(){
+  const ua=navigator.userAgent||'';
+  for(const [re,name] of IN_APP) if(re.test(ua)) return {name};
+  return null;
+}
+function setupInApp(app){
+  document.body.classList.add('in-app');
+  $('#inapp').hidden=false;
+  if(app.name) $('#inapp-name').textContent=app.name;
+  const url=location.href.split('#')[0];
+  if(/Android/i.test(navigator.userAgent)){
+    // Android : un lien « intent » ouvre directement Chrome
+    const a=$('#inapp-open'); a.hidden=false;
+    a.href='intent://'+url.replace(/^https?:\/\//,'')+'#Intent;scheme=https;package=com.android.chrome;end';
+  }
+  $('#inapp-copy').addEventListener('click',async()=>{
+    try{ await navigator.clipboard.writeText(url); say('Lien copié : collez-le dans Safari ou Chrome.'); }
+    catch{ say(url); }
+  });
+}
+/* Sur téléphone, la fenêtre surgissante de Google est capricieuse (onglet qui
+   ne se referme pas, cookies bloqués…) : on passe par une redirection pleine page. */
+const IS_MOBILE=matchMedia('(pointer:coarse)').matches||/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
 async function setupGoogle(){
   $('#btn-google').addEventListener('click',signInGoogleRedirect);
-  if(!GOOGLE_CLIENT_ID) return;               // pas d'identifiant client : redirection seule
+  const app=inAppBrowser();
+  if(app){ setupInApp(app); return; }
+  if(!GOOGLE_CLIENT_ID||IS_MOBILE) return;    // redirection seule
   try{
     await loadGsi();
     await armGoogleButton();

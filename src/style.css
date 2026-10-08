@@ -443,6 +443,13 @@
   #gsi-btn{width:100%; display:none; justify-content:center; min-height:44px;}
   body.gsi-ready #gsi-btn{display:flex;}
   body.gsi-ready #btn-google{display:none;}
+  /* navigateur intégré (LinkedIn, Instagram…) : Google y refuse la connexion */
+  #inapp{width:100%; box-sizing:border-box; background:var(--panel); border:1px solid var(--gold); border-radius:10px; padding:14px 16px; text-align:center;}
+  #inapp p{margin:0 0 12px; font-size:15px; line-height:1.45; color:var(--ink);}
+  #inapp b{color:var(--gold);}
+  .inapp-btns{display:flex; flex-wrap:wrap; gap:10px; justify-content:center;}
+  .inapp-btns .btn{font-size:15px; padding:10px 16px; text-decoration:none;}
+  body.in-app #gsi-btn, body.in-app #btn-google{display:none !important;}
   .gate-note{margin:0; font-size:13px; color:var(--ink-dim); text-align:center; line-height:1.4;}
   .gate-note a{color:var(--ink-dim); text-underline-offset:3px;}
   .gate-wait{margin:0; font-size:14px; color:var(--ink-dim); letter-spacing:.06em;}
