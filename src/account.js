@@ -40,7 +40,6 @@ async function loadStats(){
   $('#acc-best').textContent=data.length?Math.max(...data.map(g=>g.points)):'–';
   $('#acc-titles').textContent=data.filter(g=>g.champion).length;
 }
-function escHtml(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
 function setAuthState(st){
   document.body.classList.remove('auth-wait','auth-out','auth-in');
@@ -51,7 +50,7 @@ function refreshUi(){
   if(on){
     $('#acc-name').textContent=profileName()||'…';
     $('#acc-mail').textContent=user.email||'';
-    $('#accchip').innerHTML=`Connecté · <b>${escHtml(profileName()||'')}</b> · <u>mon compte</u>`;
+    $('#acc-chipname').textContent=profileName()||'';
     // le pseudo du menu est celui du compte
     if(profileName()) $('#pseudo').value=profileName();
   }
@@ -98,9 +97,11 @@ function initAccount(){
   setAuthState('wait');
   $('#btn-google').addEventListener('click',signInGoogle);
   $('#btn-account').addEventListener('click',()=>openAccount('#scr-menu'));
-  $('#accchip').addEventListener('click',()=>openAccount('#scr-menu'));
+  $('#btn-chip-account').addEventListener('click',()=>openAccount('#scr-menu'));
   $('#btn-acc-back').addEventListener('click',()=>showScreen(G.accBack||'#scr-menu'));
-  $('#btn-logout').addEventListener('click',async()=>{ await sb.auth.signOut(); showScreen('#scr-menu'); });
+  const logout=async()=>{ await sb.auth.signOut(); showScreen('#scr-menu'); };
+  $('#btn-logout').addEventListener('click',logout);
+  $('#btn-chip-logout').addEventListener('click',logout);
 
   sb.auth.onAuthStateChange((_ev,session)=>{
     // pas d'appel Supabase attendu dans ce callback (risque de blocage) : on diffère
