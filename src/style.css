@@ -430,6 +430,7 @@
   body.gsi-ready #gsi-btn{display:flex;}
   body.gsi-ready #btn-google{display:none;}
   .gate-note{margin:0; font-size:13px; color:var(--ink-dim); text-align:center; line-height:1.4;}
+  .gate-note a{color:var(--ink-dim); text-underline-offset:3px;}
   .gate-wait{margin:0; font-size:14px; color:var(--ink-dim); letter-spacing:.06em;}
   #auth-msg{margin:0; min-height:1.2em; font-size:14px; color:var(--ink-dim); text-align:center;}
   #auth-msg.err{color:#ff7a80;}
