@@ -74,3 +74,10 @@ Pour l'activer :
 Suivi des joueurs et des parties : `supabase/stats.sql` (à lancer dans le SQL Editor).
 Une partie = un Mondial terminé (élimination ou titre).
 Pour n'autoriser que Google côté serveur aussi : Supabase → Authentication → Sign In / Providers → désactiver *Email*.
+
+### Alerte e-mail à chaque nouveau joueur
+
+`supabase/migrations/20261008120000_alerte_nouveau_joueur.sql` (SQL Editor) installe un trigger qui
+envoie un e-mail via [Resend](https://resend.com) à chaque inscription. Secrets à créer dans le Vault :
+`select vault.create_secret('re_…','resend_api_key'); select vault.create_secret('vous@exemple.com','notify_email');`
+Avec l'expéditeur de test `onboarding@resend.dev`, l'e-mail de destination doit être celui du compte Resend.
