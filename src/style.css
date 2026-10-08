@@ -426,6 +426,9 @@
   body:not(.auth-out) .guest-only{display:none !important;}
   body:not(.auth-wait) .gate-wait{display:none !important;}
   .gate{display:flex; flex-direction:column; align-items:center; gap:10px; width:min(400px,92vw);}
+  #gsi-btn{width:100%; display:none; justify-content:center; min-height:44px;}
+  body.gsi-ready #gsi-btn{display:flex;}
+  body.gsi-ready #btn-google{display:none;}
   .gate-note{margin:0; font-size:13px; color:var(--ink-dim); text-align:center; line-height:1.4;}
   .gate-wait{margin:0; font-size:14px; color:var(--ink-dim); letter-spacing:.06em;}
   #auth-msg{margin:0; min-height:1.2em; font-size:14px; color:var(--ink-dim); text-align:center;}

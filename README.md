@@ -69,7 +69,9 @@ Pour l'activer :
 5. Google : créer un identifiant OAuth « Application Web » dans Google Cloud Console
    (APIs & Services → Credentials), avec comme *Authorized redirect URI*
    `https://<projet>.supabase.co/auth/v1/callback` ; puis coller Client ID / Secret dans
-   Supabase → Authentication → Providers → Google.
+   Supabase → Authentication → Providers → Google. Ajouter aussi `VITE_GOOGLE_CLIENT_ID` (même Client ID)
+   et, dans *Authorized JavaScript origins*, l'URL du jeu + `http://localhost:5173` : le jeu utilise le bouton
+   officiel Google (fenêtre ouverte depuis le domaine du jeu, pas celui de Supabase).
 
 Suivi des joueurs et des parties : `supabase/stats.sql` (à lancer dans le SQL Editor).
 Une partie = un Mondial terminé (élimination ou titre).

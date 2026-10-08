@@ -82,7 +82,56 @@ async function saveGame(g){
   if(error) console.warn('[compte] partie non enregistrée :',error.message);
 }
 
-async function signInGoogle(){
+/* Connexion Google « sur place » (Google Identity Services) : la fenêtre de
+   Google est ouverte depuis notre domaine et affiche donc mondial-penalties…
+   et non l'adresse technique de Supabase. Le jeton reçu est ensuite échangé
+   contre une session Supabase. Repli : la redirection OAuth classique. */
+const GOOGLE_CLIENT_ID=import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+async function sha256Hex(txt){
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(txt));
+  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+function loadGsi(){
+  return new Promise((ok,ko)=>{
+    if(window.google&&window.google.accounts) return ok();
+    const sc=document.createElement('script');
+    sc.src='https://accounts.google.com/gsi/client'; sc.async=true;
+    sc.onload=()=>ok(); sc.onerror=()=>ko(new Error('gsi'));
+    document.head.appendChild(sc);
+  });
+}
+let rawNonce='';
+async function armGoogleButton(){
+  // nonce : Google reçoit son empreinte, Supabase la valeur brute et vérifie la correspondance
+  rawNonce=crypto.randomUUID()+crypto.randomUUID();
+  const hashed=await sha256Hex(rawNonce);
+  window.google.accounts.id.initialize({
+    client_id:GOOGLE_CLIENT_ID, nonce:hashed, ux_mode:'popup',
+    use_fedcm_for_button:true, itp_support:true,
+    callback:async resp=>{
+      say('Connexion…');
+      const {error}=await sb.auth.signInWithIdToken({provider:'google',token:resp.credential,nonce:rawNonce});
+      if(error){ say(frError(error),'err'); armGoogleButton(); }
+    },
+  });
+  const host=$('#gsi-btn');
+  window.google.accounts.id.renderButton(host,{
+    type:'standard', theme:'outline', size:'large', shape:'rectangular',
+    text:'continue_with', logo_alignment:'center', locale:'fr',
+    width:Math.min(400,Math.round(host.getBoundingClientRect().width)||320),
+  });
+}
+async function setupGoogle(){
+  $('#btn-google').addEventListener('click',signInGoogleRedirect);
+  if(!GOOGLE_CLIENT_ID) return;               // pas d'identifiant client : redirection seule
+  try{
+    await loadGsi();
+    await armGoogleButton();
+    document.body.classList.add('gsi-ready');   // le bouton officiel remplace le nôtre
+  }catch(e){ console.warn('[compte] bouton Google indisponible, repli sur la redirection',e); }
+}
+async function signInGoogleRedirect(){
   say('Redirection vers Google…');
   const {error}=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname}});
   if(error) say(frError(error),'err');
@@ -95,11 +144,15 @@ function initAccount(){
     return;
   }
   setAuthState('wait');
-  $('#btn-google').addEventListener('click',signInGoogle);
+  setupGoogle();
   $('#btn-account').addEventListener('click',()=>openAccount('#scr-menu'));
   $('#btn-chip-account').addEventListener('click',()=>openAccount('#scr-menu'));
   $('#btn-acc-back').addEventListener('click',()=>showScreen(G.accBack||'#scr-menu'));
-  const logout=async()=>{ await sb.auth.signOut(); showScreen('#scr-menu'); };
+  const logout=async()=>{
+    await sb.auth.signOut();
+    if(window.google&&window.google.accounts) window.google.accounts.id.disableAutoSelect();
+    showScreen('#scr-menu');
+  };
   $('#btn-logout').addEventListener('click',logout);
   $('#btn-chip-logout').addEventListener('click',logout);
 
